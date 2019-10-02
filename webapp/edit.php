@@ -5,23 +5,6 @@ error_reporting(E_ALL);
 
 
 
-// Declare the credentials to the database
-$dbconnecterror = FALSE;
-$dbh = NULL;
-
-require_once 'credentials.php';
-
-try{
-	
-	$conn_string = "mysql:host=".$dbserver.";dbname=".$db;
-	
-	$dbh= new PDO($conn_string, $dbusername, $dbpassword);
-	$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	
-}catch(Exception $e){
-	$dbconnecterror = TRUE;
-}
-
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	
 	$listID = $_POST['listID'];
@@ -38,26 +21,36 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	}
 	$listItem = $_POST['listItem'];
 	
-
+	
+	
 	if (!$dbconnecterror) {
 		try {
-			$sql = "UPDATE doList SET complete=:complete, listItem=:listItem, finishDate=:finishDate WHERE listID=:listID";
-			$stmt = $dbh->prepare($sql);			
-			$stmt->bindParam(":complete", $complete);
-			$stmt->bindParam(":listItem", $listItem);
-			$stmt->bindParam(":finishDate", $finBy);
-			$stmt->bindParam(":listID", $listID);
-
-			$response = $stmt->execute();	
+			//make a call to the api
 			
-			header("Location: index.php");
+			//build url for api
+			$url = "http://3.213.65.50/api/task.php?listID=$listID";
 			
-		} catch (PDOException $e) {
-			header("Location: index.php?error=edit");
+			//create json string
+			$data = array('completed'=>$complete,'taskName'=>$listItem,'taskDate'=>$finBy);
+			$data_json = json_encode($data); //converts array to string
 			
-		}	
-	} else {
-		header("Location: index.php?error=edit");
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json','Content-Length: ' . strlen($data_json)));
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+			curl_setopt($ch, CURLOPT_POSTFIELDS,$data_json);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$response  = curl_exec($ch); //body of the response
+			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			
+			//status code 204
+			if($httpcode==203) {
+				header("Location: index.php");
+			} else {
+				header("Location: index.php?error=edit");
+			}
+		}
 	}
 }
 ?>
