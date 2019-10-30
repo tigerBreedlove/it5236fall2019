@@ -4,9 +4,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	$listID = $_POST['listID'];
 	
 	if (array_key_exists('fin', $_POST)) {
-		$complete = 1;
+		$complete = true;
 	} else {
-		$complete = 0;
+		$complete = false;
 	}
 	if (empty($_POST['finBy'])) {
 		$finBy = null;
@@ -14,8 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		$finBy = $_POST['finBy'];
 	}
 	$listItem = $_POST['listItem'];
-	
-	
 	
 
 	//make a call to the api

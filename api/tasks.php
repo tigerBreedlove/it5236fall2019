@@ -15,33 +15,28 @@ try{
 //READ - GET
 if ($_SERVER['REQUEST_METHOD'] == "GET") {
 	$listID = $_GET['listID'];
-	if (!$dbconnecterror) {
 		
-		try {
-			$sql = "SELECT listID, listItem AS taskName, finishDate AS taskDate, complete AS completed FROM doList";
-			$stmt = $dbh->prepare($sql);
-			$response = $stmt->execute();
-			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			
-			$final = [];
-			foreach($result as $task) {
-				$task['completed'] = $task['completed'] ? true : false;
-				$final[] = $task;
-			}
-			http_response_code(200);
-			echo json_encode($final);
-			exit();
-		} catch (PDOException $e) {
-			http_response_code(504);
-			echo "Database exception";
-			exit();
+	try {
+		$sql = "SELECT listID, listItem AS taskName, finishDate AS taskDate, complete AS completed FROM doList";
+		$stmt = $dbh->prepare($sql);
+		$response = $stmt->execute();
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		
+		$final = [];
+		foreach($result as $task) {
+			$task['completed'] = $task['completed'] ? true : false;
+			$final[] = $task;
 		}
-	} else {
-		http_response_code(405);
-	}
+		http_response_code(200);
+		echo json_encode($final);
+		exit();
+	} catch (PDOException $e) {
+		http_response_code(504);
+		echo "Database exception";
+		exit();
+		}
 } else {
 	http_response_code(405);//method not allowed
 	echo "Unsupported HTTP method";
 	exit();
 }
-?>
