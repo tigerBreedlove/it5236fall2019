@@ -23,14 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 			$response = $stmt->execute();
 			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			
-			// $final = [];
+			$final = [];
 			foreach($result as $task) {
 				$task['completed'] = $task['completed'] ? true : false;
-				// $final[] = $task;
+				$final[] = $task;
 			}
 			http_response_code(200);
-			echo json_encode ($result);
-			// echo json_encode($final);
+			echo json_encode($final);
 			exit();
 		} catch (PDOException $e) {
 			http_response_code(504);
@@ -45,3 +44,4 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
 	echo "Unsupported HTTP method";
 	exit();
 }
+?>
