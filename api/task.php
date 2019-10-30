@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 // Declare the credentials to the database
 $dbconnecterror = FALSE;
 $dbh = NULL;
@@ -97,41 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] == "PUT") {
 	} else {
 		http_response_code(504);
 	}
-//READ - GET
-} else if ($_SERVER['REQUEST_METHOD'] == "GET") {
-	if(array_key_exists('listID',$_GET)){
-		$listID = $_GET['listID'];
-	}else{
-		http_response_code(400);
-		echo "Missing listID";
-		exit(); 
-	}
-	$listID = $_GET['listID'];
-	if (!$dbconnecterror) {
-		
-		try {
-			$sql = "SELECT * FROM doList WHERE listID=:listID";
-			$stmt = $dbh->prepare($sql);
-			$stmt->bindParam(":listID", $listID);
-			$response = $stmt->execute();
-			$result = $stmt->fetch(PDO::FETCH_ASSOC);
-			if (!is_array($result)){
-				http_response_code(404);
-				exit();
-			}
-			
-			http_response_code(200);
-			echo json_encode ($result);
-			exit();
-		} catch (PDOException $e) {
-			http_response_code(504);
-			echo "Database exception";
-			exit();
-		}
-	} else {
-		http_response_code(504);
-	}
-	
 //CREATE - POST	
 } else if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	$task = json_decode(file_get_contents('php://input'), true);
@@ -166,10 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] == "PUT") {
 			$response = $stmt->execute();
 			$taskID = $dbh->lastInsertId();
 				$fulltask = [
-				"listID"=>$taskID,
-				"complete"=>$complete,
-				"listItem"=>$taskName,
-				"finishDate"=>$taskDate
+					"listID"=>$taskID,
+					"completed"=>$complete,
+					"taskName"=>$taskName,
+					"taskDate"=>$taskDate
 				];
 			http_response_code(201);
 			echo json_encode($fulltask);
